@@ -110,7 +110,6 @@ df.to_csv('/mnt/j6/m252055/20210104_cmbDetection/20211004_preprocessed/training_
 
 ## TO DO:
 # Testing -- different script maybe (load model and evaluate)
-print('Hi')
 
 
 
