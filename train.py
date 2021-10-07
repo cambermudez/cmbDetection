@@ -58,6 +58,7 @@ for epoch in range(args.epochs):
 
     # Training
     cmbNet.train()
+    c=0
     for x, y in training_loader:
 
         # Forward pass
@@ -72,6 +73,9 @@ for epoch in range(args.epochs):
         opt.zero_grad()
         tr_loss.backward()
         opt.step()
+
+        c += 1
+        print(c)
 
     # Validation
     with torch.nograd():   # Freeze weights, no backprop -- MUCH faster computations
