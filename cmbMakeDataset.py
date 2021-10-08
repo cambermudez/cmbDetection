@@ -1,10 +1,10 @@
 # %%
-#%config Completer.use_jedi = False
 
 # %%
 import pandas as pd
 import numpy as np
 import h5py
+from tqdm import tqdm
 
 # %%
 def cmbMakeDataset(in_cmbTable,out_filePath):
@@ -15,11 +15,6 @@ def cmbMakeDataset(in_cmbTable,out_filePath):
     unique_scansTable = in_cmbTable.drop_duplicates(subset='seriesuid')
 
     with h5py.File(out_filePath,'w') as hf:
-#             del hf['/train/true_pos_slabs']
-#             del hf['/train/false_pos_slabs']
-#             del hf['/valid/true_pos_slabs']
-#             del hf['/valid/false_pos_slabs']
-
 
         hf.create_dataset('/train/true_pos_slabs',tp_size,maxshape=(None,200,3,33,33,5),
                          dtype='f4',chunks=(10**4,2,3,33,33,5))
@@ -36,7 +31,7 @@ def cmbMakeDataset(in_cmbTable,out_filePath):
         hf.create_dataset('/test/false_pos_slabs',fp_size,maxshape=(None,2,3,33,33,5),
                          dtype='f4',chunks=(10**4,2,3,33,33,5))
 
-        for ii,h5_path in enumerate(unique_scansTable['cmbCandidates_hdf5']):
+        for ii,h5_path in tqdm(enumerate(unique_scansTable['cmbCandidates_hdf5'])):
             try:
                 if unique_scansTable['tvtLabel'].iloc[ii]=='Train':
                     group = '/train'
@@ -59,28 +54,18 @@ def cmbMakeDataset(in_cmbTable,out_filePath):
             except:
                 # This is here because some rows in the table are wrong/corrupted. Maybe add a counter later to see which ones
                 continue
-            if ii > 10:
-                break
     pass
 
 # %%
-# cmbTable = pd.read_csv('/mnt/j6/m167350/20210810_cmbDetection/')
 cmbTable = pd.read_csv('/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20210826_cmbProcessedTableForPython.csv',error_bad_lines=False)
 
 # %%
-# out_filePath = '/mnt/j6/m167350/20210810_cmbDetection/'
-out_filePath = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20210827_cmbOrderedDataset.hdf5'
+out_filePath = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20211008_cmbOrderedDataset.hdf5'
 
 # %%
-print('Making Dataset...')
+print('Making Dataset...\n')
 cmbMakeDataset(cmbTable,out_filePath)
-print('Done!')
-# %%
-cmbTable.columns
-
-# %%
-f = h5py.File(out_filePath)
-print(f['train'].keys())
+print('Done!\n')
 
 # %%
 print(f['/train/true_pos_slabs'].shape)
