@@ -14,7 +14,7 @@ from torch.utils.data import IterableDataset,get_worker_info,DataLoader
 from itertools import chain, islice, cycle
 
 # %%
-data_source = '/mnt/j6/m252055/20210104_cmbDetection/20211004_preprocessed/20210827_cmbOrderedDataset.hdf5'
+data_source = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20210827_cmbOrderedDataset.hdf5'
 data_file = h5py.File(data_source,'r')
 
 # %%

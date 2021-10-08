@@ -20,11 +20,11 @@ torch.backends.cudnn.benchmark = True
 ## To Do: Add parse args if necessary
 parser = argparse.ArgumentParser(description='Run cmbNet detection of TP vs FP')
 parser.add_argument('--epochs', required=False, default = 10, help='Number of epochs to train', type=int)
-parser.add_argument('--batch_size', required=False, default = 100, help='Number of epochs to train', type=int)
+parser.add_argument('--batch-size', required=False, default = 100, help='Number of epochs to train', type=int)
 args = parser.parse_args()
 
 ## Set up data loader
-data_file = '/mnt/j6/m252055/20210104_cmbDetection/20211004_preprocessed/20210827_cmbOrderedDataset.hdf5'
+data_file = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20210827_cmbOrderedDataset.hdf5'
 
 print("Making Data Loaders")
 train_ds      = simpleSlabDataset(data_file,group='train')
@@ -74,9 +74,6 @@ for epoch in range(args.epochs):
         tr_loss.backward()
         oipt.step()
 	
-	c+=1
-	print(c)
-
         c += 1
         print(c)
 
