@@ -30,6 +30,11 @@ def cmbMakeDataset(in_cmbTable,out_filePath):
                          dtype='f4',chunks=(10**4,2,3,33,33,5))
         hf.create_dataset('/valid/false_pos_slabs',fp_size,maxshape=(None,2,3,33,33,5),
                          dtype='f4',chunks=(10**4,2,3,33,33,5))
+        
+        hf.create_dataset('/test/true_pos_slabs',tp_size,maxshape=(None,200,3,33,33,5),
+                         dtype='f4',chunks=(10**4,2,3,33,33,5))
+        hf.create_dataset('/test/false_pos_slabs',fp_size,maxshape=(None,2,3,33,33,5),
+                         dtype='f4',chunks=(10**4,2,3,33,33,5))
 
         for ii,h5_path in enumerate(unique_scansTable['cmbCandidates_hdf5']):
             try:
@@ -50,8 +55,12 @@ def cmbMakeDataset(in_cmbTable,out_filePath):
 
                 hf[group + '/false_pos_slabs'].resize(hf[group + '/false_pos_slabs'].shape[0] + fp_dset.shape[0],axis=0)
                 hf[group + '/false_pos_slabs'][-fp_dset.shape[0]:,:,:,:,:,:] = fp_dset;
+                
             except:
+                # This is here because some rows in the table are wrong/corrupted. Maybe add a counter later to see which ones
                 continue
+            if ii > 10:
+                break
     pass
 
 # %%
