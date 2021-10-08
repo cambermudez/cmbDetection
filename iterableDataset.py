@@ -25,9 +25,9 @@ class simpleSlabDataset(IterableDataset):
         
         self.data = data_file
         self.group = group   # train, valid, or test
-        print(data_file['/' + self.group + '/true_pos_slabs'].shape)
-        self.tp_len = data_file['/' + self.group + '/true_pos_slabs'].shape[0]
-        self.fp_len = data_file['/' + self.group + '/false_pos_slabs'].shape[0]
+        print(self.data)
+        self.tp_len = self.data['/' + self.group + '/true_pos_slabs'].shape[0]
+        self.fp_len = self.data['/' + self.group + '/false_pos_slabs'].shape[0]
         self.batch_size = batch_size
         self.tp_percent = tp_percent
         
