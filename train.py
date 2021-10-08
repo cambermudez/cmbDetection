@@ -72,7 +72,7 @@ for epoch in range(args.epochs):
         # Backpropagation
         opt.zero_grad()
         tr_loss.backward()
-        oipt.step()
+        opt.step()
 	
         c += 1
         print(c)
