@@ -23,7 +23,8 @@ class simpleSlabDataset(IterableDataset):
     def __init__(self, data_file, batch_size=100, tp_percent=0.5, group=None):
         assert tp_percent<1
         
-        self.data = data_file
+        #self.data = data_file
+        self.data = h5py.File(data_file,'r')
         self.group = group   # train, valid, or test
         print(self.data)
         self.tp_len = self.data['/' + self.group + '/true_pos_slabs'].shape[0]
