@@ -83,7 +83,7 @@ for epoch in range(args.epochs):
     with torch.no_grad():   # Freeze weights, no backprop -- MUCH faster computations
 
         cmbNet.eval()      # Remove dropout effects
-        for x, y in validation_loader:
+        for x, y in tqdm(validation_loader):
             y_hat = cmbNet(x.to(gpu_device))
             val_loss = criterion(y_hat.to(gpu_device), y.to(gpu_device))
             validation_losses.append(val_loss.detach().cpu().numpy().item())
@@ -91,17 +91,16 @@ for epoch in range(args.epochs):
             y_val_epoch.extend(y.numpy())
             yhat_val_epoch.extend(y_hat.detach().cpu().numpy())
 #            break
-
+    
     # Display Cross-Entropy Loss for each epoch
-    print(f'Epoch {epoch} : \n '
-          'Training Loss: {np.mean(training_losses):.2f} \n'
-          'Validation Loss: {np.mean(validation_losses):.2f} \n'
-          '\n'
-          'Training AUC {roc_auc_score(y_tr_epoch,yhat_tr_epoch):.2f}: \n'
-          'Validation AUC {roc_auc_score(y_val_epoch,yhat_val_epoch):.2f} \n')
+    print(f"Epoch {epoch} : \n "
+          f"Training Loss: {np.mean(training_losses):.2f} \n"
+          f"Validation Loss: {np.mean(validation_losses):.2f} \n"
+          f"\n"
+          f"Training AUC {roc_auc_score(y_tr_epoch,yhat_tr_epoch):.2f}: \n"
+          f"Validation AUC {roc_auc_score(y_val_epoch,yhat_val_epoch):.2f} \n")
 
     curve_csv.append([epoch,np.mean(training_losses),np.mean(validation_losses)])
-    print(curve_csv)
 
     # Save model for each epoch
     net_fname = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/trained_cmbNet_epoch' + str(epoch) + '.h5'
@@ -109,7 +108,7 @@ for epoch in range(args.epochs):
 
 
 print("Done Training!")
-df = pd.Dataframe(curve_csv,columns=['Epoch','Training Loss','Validation Loss'])
+df = pd.DataFrame(curve_csv,columns=['Epoch','Training Loss','Validation Loss'])
 df.to_csv('/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/training_curve.csv')
 
 
