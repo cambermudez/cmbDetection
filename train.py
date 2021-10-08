@@ -29,14 +29,14 @@ data_file = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/2021082
 print("Making Data Loaders")
 train_ds      = simpleSlabDataset(data_file,group='train')
 validation_ds = simpleSlabDataset(data_file,group='valid')
-test_ds       = simpleSlabDataset(data_file,group='test')
+#test_ds       = simpleSlabDataset(data_file,group='test')
 
 train_ds.__getitem__(0)
 
-training_loader = DataLoader(train_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=8)
-validation_loader = DataLoader(validation_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=8)
-test_loader = DataLoader(test_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=8)
-
+training_loader = DataLoader(train_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=1)
+validation_loader = DataLoader(validation_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=1)
+#test_loader = DataLoader(test_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=8)
+cmbNet = cmbNet()
 cmbNet.to(gpu_device)
 criterion = torch.nn.BCELoss()
 opt = torch.optim.Adam(cmbNet.parameters(), lr=0.001)

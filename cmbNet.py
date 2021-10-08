@@ -19,16 +19,16 @@ class cmbNet(nn.Module):
 
             nn.Flatten(),
 
-            nn.Linear(in_channels=23*23*30,out_channels=20),
-            nn.Relu(),
+            nn.Linear(in_features=23*23*30,out_features=20),
+            nn.ReLU(),
             nn.Dropout3d(0.2),
 
-            nn.Linear(in_channels=20, out_channels=25),
-            nn.Relu(),
+            nn.Linear(in_features=20, out_features=25),
+            nn.ReLU(),
             nn.Dropout3d(0.2),
 
-            nn.Linear(in_channels=25, out_channels=1),
-            nn.Relu(),
+            nn.Linear(in_features=25, out_features=1),
+            nn.ReLU(),
             nn.Dropout3d(0.2),
 
             nn.Softmax(dim=1)

@@ -23,10 +23,8 @@ class simpleSlabDataset(IterableDataset):
     def __init__(self, data_file, batch_size=100, tp_percent=0.5, group=None):
         assert tp_percent<1
         
-        #self.data = data_file
         self.data = h5py.File(data_file,'r')
         self.group = group   # train, valid, or test
-        print(self.data)
         self.tp_len = self.data['/' + self.group + '/true_pos_slabs'].shape[0]
         self.fp_len = self.data['/' + self.group + '/false_pos_slabs'].shape[0]
         self.batch_size = batch_size
@@ -51,18 +49,19 @@ class simpleSlabDataset(IterableDataset):
             x = self.data['/' + self.group + '/false_pos_slabs'][fp_ix,0,...]
             y = 0
 
-        print(x.shape,y.shape)
+        x=np.transpose(x,[3,0,1,2])
+        print(x.shape,y)
         return (x, y)
 
 
-    def __iter__(self):
-        print('iter called')
-        return self.get_data(self.data)
+#    def __iter__(self):
+#        print('iter called')
+#        return self.get_data(self.data)
     
     def __len__(self):
         #twice bc we sample for each TP and FP
         return 2*self.tp_len
     
-    def tp_perBatch(self):
-        return self.tp_perBatch
+#    def tp_perBatch(self):
+#        return self.tp_perBatch
 
