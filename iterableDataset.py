@@ -8,17 +8,13 @@ If we randomize the order of samples in the dataset itself, our dataset can simp
 # %%
 import h5py
 import numpy as np
-from torch.utils.data import IterableDataset,get_worker_info,DataLoader
+from torch.utils.data import Dataset,get_worker_info,DataLoader
 
 # %%
 from itertools import chain, islice, cycle
 
 # %%
-data_source = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20210827_cmbOrderedDataset.hdf5'
-data_file = h5py.File(data_source,'r')
-
-# %%
-class simpleSlabDataset(IterableDataset):
+class simpleSlabDataset(Dataset):
     
     def __init__(self, data_file, batch_size=100, tp_percent=0.5, group=None):
         assert tp_percent<1
@@ -43,24 +39,26 @@ class simpleSlabDataset(IterableDataset):
 
             tp_ix = np.random.randint(0,self.tp_len)
             x = self.data['/' + self.group + '/true_pos_slabs'][tp_ix, 0, ...]
-            y = 1
+            x = np.nan_to_num(x,nan=np.nanmean(x))
+            y = np.array(1)
         else:
             fp_ix = np.random.randint(0, self.fp_len)
             x = self.data['/' + self.group + '/false_pos_slabs'][fp_ix,0,...]
-            y = 0
+            x = np.nan_to_num(x,nan=np.nanmean(x))
+            y = np.array(0)
 
         x=np.transpose(x,[3,0,1,2])
-        print(x.shape,y)
-        return (x, y)
-
+        y = y[...,np.newaxis]
+#        print(x.shape,y.shape)
+        return x.astype(np.float32), y.astype(np.float32)
 
 #    def __iter__(self):
 #        print('iter called')
-#        return self.get_data(self.data)
-    
+#        return self.__getitem__(self.data)
+ 
     def __len__(self):
         #twice bc we sample for each TP and FP
-        return 2*self.tp_len
+        return (self.tp_len*2)
     
 #    def tp_perBatch(self):
 #        return self.tp_perBatch

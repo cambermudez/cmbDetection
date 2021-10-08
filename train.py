@@ -1,7 +1,7 @@
 import argparse
 import pandas as pd
 from tqdm import tqdm
-
+import sys
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 import numpy as np
 
@@ -34,6 +34,10 @@ validation_ds = simpleSlabDataset(data_file,group='valid')
 train_ds.__getitem__(0)
 
 training_loader = DataLoader(train_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=1)
+for x,y in training_loader:
+	break
+print(x.shape)
+print(y.shape)
 validation_loader = DataLoader(validation_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=1)
 #test_loader = DataLoader(test_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=8)
 cmbNet = cmbNet()
@@ -58,57 +62,55 @@ for epoch in range(args.epochs):
 
     # Training
     cmbNet.train()
-    c=0
-    for x, y in training_loader:
+    for x, y in tqdm(training_loader):
 
         # Forward pass
         y_hat = cmbNet(x.to(gpu_device))
         tr_loss =  criterion(y_hat.to(gpu_device),y.to(gpu_device))
-        training_losses.append(tr_loss)
+        training_losses.append(tr_loss.detach().cpu().numpy().item())
 
-        y_tr_epoch.append(y)
-        yhat_tr_epoch.append(y_hat)
+        y_tr_epoch.extend(y.numpy())
+        yhat_tr_epoch.extend(y_hat.detach().cpu().numpy())
 
         # Backpropagation
         opt.zero_grad()
         tr_loss.backward()
         opt.step()
+#        break
 	
-        c += 1
-        print(c)
-
+    print("Starting Validation Set Evaluation... \n")
     # Validation
-    with torch.nograd():   # Freeze weights, no backprop -- MUCH faster computations
+    with torch.no_grad():   # Freeze weights, no backprop -- MUCH faster computations
 
         cmbNet.eval()      # Remove dropout effects
         for x, y in validation_loader:
             y_hat = cmbNet(x.to(gpu_device))
             val_loss = criterion(y_hat.to(gpu_device), y.to(gpu_device))
-            validation_losses.append(val_loss)
+            validation_losses.append(val_loss.detach().cpu().numpy().item())
 
-            y_val_epoch.append(y)
-            yhat_val_epoch.append(y_hat)
+            y_val_epoch.extend(y.numpy())
+            yhat_val_epoch.extend(y_hat.detach().cpu().numpy())
+#            break
 
     # Display Cross-Entropy Loss for each epoch
-    print('Epoch %s : \n '
-          'Training Loss: %f \n'
-          'Validation Loss: %f \n'
+    print(f'Epoch {epoch} : \n '
+          'Training Loss: {np.mean(training_losses):.2f} \n'
+          'Validation Loss: {np.mean(validation_losses):.2f} \n'
           '\n'
-          'Training AUC: \n'
-          'Validation AUC \n',
-          str(epoch), np.mean(training_losses),np.mean(validation_losses),roc_auc_score(y_tr_epoch,yhat_tr_epoch),roc_auc_score(y_val_epoch,yhat_val_epoch))
+          'Training AUC {roc_auc_score(y_tr_epoch,yhat_tr_epoch):.2f}: \n'
+          'Validation AUC {roc_auc_score(y_val_epoch,yhat_val_epoch):.2f} \n')
 
     curve_csv.append([epoch,np.mean(training_losses),np.mean(validation_losses)])
     print(curve_csv)
 
     # Save model for each epoch
-    net_fname = '/mnt/j6/m252055/20210104_cmbDetection/20211004_preprocessed/trained_cmbNet_epoch' + str(epoch) + '.h5'
+    net_fname = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/trained_cmbNet_epoch' + str(epoch) + '.h5'
     torch.save(cmbNet.state_dict(), net_fname)
 
 
 print("Done Training!")
 df = pd.Dataframe(curve_csv,columns=['Epoch','Training Loss','Validation Loss'])
-df.to_csv('/mnt/j6/m252055/20210104_cmbDetection/20211004_preprocessed/training_curve.csv')
+df.to_csv('/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/training_curve.csv')
 
 
 
