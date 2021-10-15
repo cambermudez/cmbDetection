@@ -14,6 +14,10 @@ Outputs (explicit)
 1. Trained network for each epoch
 2. Logs for training and validation loss
 
+## Test.py
+
+Similar to train.py,  but will evaluate the validation and testing set and save results as a mat file. 
+
 
 ## cmbNET.py
 Network architecture
