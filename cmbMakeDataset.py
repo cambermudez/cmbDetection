@@ -68,6 +68,6 @@ cmbMakeDataset(cmbTable,out_filePath)
 print('Done!\n')
 
 # %%
-print(f['/train/true_pos_slabs'].shape)
-print(f['/valid/true_pos_slabs'].shape)
-print(f['/test/true_pos_slabs'].shape)
+print(['/train/true_pos_slabs'].shape)
+print(['/valid/true_pos_slabs'].shape)
+print(['/test/true_pos_slabs'].shape)

@@ -2,6 +2,7 @@ import argparse
 import pandas as pd
 from tqdm import tqdm
 import sys
+import os
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 import numpy as np
 
@@ -17,14 +18,20 @@ use_cuda = torch.cuda.is_available()
 gpu_device = torch.device("cuda:0" if use_cuda else "cpu")
 torch.backends.cudnn.benchmark = True
 
-## To Do: Add parse args if necessary
+## Organize input arguments
 parser = argparse.ArgumentParser(description='Run cmbNet detection of TP vs FP')
 parser.add_argument('--epochs', required=False, default = 10, help='Number of epochs to train', type=int)
 parser.add_argument('--batch-size', required=False, default = 100, help='Number of epochs to train', type=int)
+parser.add_argument('--experiment-date', required=True, help='Model Date under ./workdir/YYYYMMDD/', type=str)
+parser.add_argument('--workdir', required=False,default='/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/', type=str)
 args = parser.parse_args()
 
+## Generate directory for experiment if it doesn't exist
+if not os.path.exists(os.path.join(args.workdir,args.experiment_date)):
+    os.makedirs(os.path.join(args.workdir,args.experiment_date))
+
 ## Set up data loader
-data_file = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20211008_cmbOrderedDataset.hdf5'
+data_file = os.path.join(args.workdir,'20211008_cmbOrderedDataset.hdf5')
 
 print("Making Data Loaders")
 train_ds      = simpleSlabDataset(data_file,group='train')
@@ -103,17 +110,14 @@ for epoch in range(args.epochs):
     curve_csv.append([epoch,np.mean(training_losses),np.mean(validation_losses),
                     roc_auc_score(y_tr_epoch,yhat_tr_epoch),roc_auc_score(y_val_epoch,yhat_val_epoch) ])
 
+    df = pd.DataFrame(curve_csv, columns=['Epoch', 'Training Loss', 'Validation Loss', 'TrainingAUC', 'ValidationAUC'])
+    df.to_csv(os.path.join(args.workdir,'training_curve.csv'))
+
     # Save model for each epoch
-    net_fname = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/trained_cmbNet_epoch' + str(epoch) + '.h5'
+    net_fname = os.path.join(args.workdir,args.experiment_date,'trained_cmbNet_epoch' + str(epoch) + '.h5')
     torch.save(cmbNet.state_dict(), net_fname)
 
-    df = pd.DataFrame(curve_csv,columns=['Epoch','Training Loss','Validation Loss','TrainingAUC','ValidationAUC'])
-    df.to_csv('/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/training_curve.csv')
-
 print('Done Training')
-
-## TO DO:
-# Testing -- different script maybe (load model and evaluate)
 
 
 
