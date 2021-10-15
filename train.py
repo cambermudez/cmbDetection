@@ -24,7 +24,7 @@ parser.add_argument('--batch-size', required=False, default = 100, help='Number 
 args = parser.parse_args()
 
 ## Set up data loader
-data_file = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20210827_cmbOrderedDataset.hdf5'
+data_file = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/20211008_cmbOrderedDataset.hdf5'
 
 print("Making Data Loaders")
 train_ds      = simpleSlabDataset(data_file,group='train')
@@ -43,7 +43,7 @@ validation_loader = DataLoader(validation_ds, batch_size=args.batch_size,shuffle
 cmbNet = cmbNet()
 cmbNet.to(gpu_device)
 criterion = torch.nn.BCELoss()
-opt = torch.optim.Adam(cmbNet.parameters(), lr=0.001)
+opt = torch.optim.SGD(cmbNet.parameters(), lr=0.001)
 
 # Instantiate the output csv
 curve_csv = []
@@ -100,18 +100,17 @@ for epoch in range(args.epochs):
           f"Training AUC {roc_auc_score(y_tr_epoch,yhat_tr_epoch):.2f}: \n"
           f"Validation AUC {roc_auc_score(y_val_epoch,yhat_val_epoch):.2f} \n")
 
-    curve_csv.append([epoch,np.mean(training_losses),np.mean(validation_losses)])
+    curve_csv.append([epoch,np.mean(training_losses),np.mean(validation_losses),
+                    roc_auc_score(y_tr_epoch,yhat_tr_epoch),roc_auc_score(y_val_epoch,yhat_val_epoch) ])
 
     # Save model for each epoch
     net_fname = '/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/trained_cmbNet_epoch' + str(epoch) + '.h5'
     torch.save(cmbNet.state_dict(), net_fname)
 
+    df = pd.DataFrame(curve_csv,columns=['Epoch','Training Loss','Validation Loss','TrainingAUC','ValidationAUC'])
+    df.to_csv('/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/training_curve.csv')
 
-print("Done Training!")
-df = pd.DataFrame(curve_csv,columns=['Epoch','Training Loss','Validation Loss'])
-df.to_csv('/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/training_curve.csv')
-
-
+print('Done Training')
 
 ## TO DO:
 # Testing -- different script maybe (load model and evaluate)
