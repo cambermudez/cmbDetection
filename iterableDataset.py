@@ -1,17 +1,8 @@
 
 # %%
-"""
-# Iterable Dataset
-If we randomize the order of samples in the dataset itself, our dataset can simply iterate through samples.
-"""
-
-# %%
 import h5py
 import numpy as np
-from torch.utils.data import Dataset,get_worker_info,DataLoader
-
-# %%
-from itertools import chain, islice, cycle
+from torch.utils.data import Dataset
 
 # %%
 class simpleSlabDataset(Dataset):
@@ -23,14 +14,7 @@ class simpleSlabDataset(Dataset):
         self.group = group   # train, valid, or test
         self.tp_len = self.data['/' + self.group + '/true_pos_slabs'].shape[0]
         self.fp_len = self.data['/' + self.group + '/false_pos_slabs'].shape[0]
-        self.batch_size = batch_size
-        self.tp_percent = tp_percent
-        
-        self.last_tp = 0
-        self.last_fp = 0
-        
-        self.tp_perBatch = int(self.batch_size*tp_percent)
-        self.fp_perBatch = int(self.batch_size-self.tp_perBatch)
+
                 
     def __getitem__(self, inx):
 
@@ -51,15 +35,10 @@ class simpleSlabDataset(Dataset):
         y = y[...,np.newaxis]
 #        print(x.shape,y.shape)
         return x.astype(np.float32), y.astype(np.float32)
-
-#    def __iter__(self):
-#        print('iter called')
-#        return self.__getitem__(self.data)
  
     def __len__(self):
         #twice bc we sample for each TP and FP
         return (self.tp_len*2)
     
-#    def tp_perBatch(self):
-#        return self.tp_perBatch
+
 

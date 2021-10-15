@@ -36,7 +36,6 @@ data_file = os.path.join(args.workdir,'20211008_cmbOrderedDataset.hdf5')
 print("Making Data Loaders")
 train_ds      = simpleSlabDataset(data_file,group='train')
 validation_ds = simpleSlabDataset(data_file,group='valid')
-#test_ds       = simpleSlabDataset(data_file,group='test')
 
 train_ds.__getitem__(0)
 
@@ -108,7 +107,10 @@ for epoch in range(args.epochs):
           f"Validation AUC {roc_auc_score(y_val_epoch,yhat_val_epoch):.2f} \n")
 
     curve_csv.append([epoch,np.mean(training_losses),np.mean(validation_losses),
-                    roc_auc_score(y_tr_epoch,yhat_tr_epoch),roc_auc_score(y_val_epoch,yhat_val_epoch) ])
+                    roc_auc_score(y_tr_epoch,yhat_tr_epoch),roc_auc_score(y_val_epoch,yhat_val_epoch)])
+
+    df = pd.DataFrame(curve_csv, columns=['Epoch', 'Training Loss', 'Validation Loss', 'TrainingAUC', 'ValidationAUC'])
+    df.to_csv(os.path.join(args.workdir,'training_curve.csv'))
 
     df = pd.DataFrame(curve_csv, columns=['Epoch', 'Training Loss', 'Validation Loss', 'TrainingAUC', 'ValidationAUC'])
     df.to_csv(os.path.join(args.workdir,args.experiment_date,'training_curve.csv'))
