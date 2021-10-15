@@ -103,7 +103,7 @@ for epoch in range(args.epochs):
     print(f"Epoch {epoch} : \n "
           f"Training Loss: {np.mean(training_losses):.2f} \n"
           f"Validation Loss: {np.mean(validation_losses):.2f} \n"
-          f"\n"
+          f"\n",
           f"Training AUC {roc_auc_score(y_tr_epoch,yhat_tr_epoch):.2f}: \n"
           f"Validation AUC {roc_auc_score(y_val_epoch,yhat_val_epoch):.2f} \n")
 
@@ -111,7 +111,7 @@ for epoch in range(args.epochs):
                     roc_auc_score(y_tr_epoch,yhat_tr_epoch),roc_auc_score(y_val_epoch,yhat_val_epoch) ])
 
     df = pd.DataFrame(curve_csv, columns=['Epoch', 'Training Loss', 'Validation Loss', 'TrainingAUC', 'ValidationAUC'])
-    df.to_csv(os.path.join(args.workdir,'training_curve.csv'))
+    df.to_csv(os.path.join(args.workdir,args.experiment_date,'training_curve.csv'))
 
     # Save model for each epoch
     net_fname = os.path.join(args.workdir,args.experiment_date,'trained_cmbNet_epoch' + str(epoch) + '.h5')

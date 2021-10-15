@@ -38,7 +38,7 @@ validation_loader = DataLoader(validation_ds, batch_size=args.batch_size,shuffle
 test_loader = DataLoader(test_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=1)
 
 cmbNet = cmbNet()
-cmbNet.load_state_dict(torch.load(os.path.join(args.workdir,args.experiment_name,'trained_cmbNet_epoch'+args.load_epoch+'.h5')))
+cmbNet.load_state_dict(torch.load(os.path.join(args.workdir,args.experiment_date,'trained_cmbNet_epoch'+args.load_epoch+'.h5')))
 
 cmbNet.to(gpu_device)
 criterion = torch.nn.BCELoss()
@@ -64,16 +64,17 @@ with torch.no_grad():   # Freeze weights, no backprop -- MUCH faster computation
 
         y_val_epoch.extend(y.numpy())
         yhat_val_epoch.extend(y_hat.detach().cpu().numpy())
-#            break
+#        break
 
+    print("Starting Testing Set Evaluation ... \n")
     for x, y in tqdm(test_loader):
-            y_hat = cmbNet(x.to(gpu_device))
-            test_loss = criterion(y_hat.to(gpu_device), y.to(gpu_device))
-            testing_losses.append(val_loss.detach().cpu().numpy().item())
+        y_hat = cmbNet(x.to(gpu_device))
+        test_loss = criterion(y_hat.to(gpu_device), y.to(gpu_device))
+        testing_losses.append(val_loss.detach().cpu().numpy().item())
 
-            y_te_epoch.extend(y.numpy())
-            yhat_te_epoch.extend(y_hat.detach().cpu().numpy())
-    #            break
+        y_te_epoch.extend(y.numpy())
+        yhat_te_epoch.extend(y_hat.detach().cpu().numpy())
+#        break
 
 
 print(f"Validation Loss: {np.mean(validation_losses):.2f} \n"
