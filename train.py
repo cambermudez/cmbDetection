@@ -20,10 +20,11 @@ torch.backends.cudnn.benchmark = True
 
 ## Organize input arguments
 parser = argparse.ArgumentParser(description='Run cmbNet detection of TP vs FP')
-parser.add_argument('--epochs', required=False, default = 10, help='Number of epochs to train', type=int)
-parser.add_argument('--batch-size', required=False, default = 100, help='Number of epochs to train', type=int)
+parser.add_argument('--epochs', required=False, default = 100, help='Number of epochs to train', type=int)
+parser.add_argument('--batch-size', required=False, default = 64, help='Number of epochs to train', type=int)
 parser.add_argument('--experiment-date', required=True, help='Model Date under ./workdir/YYYYMMDD/', type=str)
 parser.add_argument('--workdir', required=False,default='/mnt/j6/m252055/20211004_cmbDetection/20211004_preprocessed/', type=str)
+parser.add_argument('--learning-rate',required=False,default=0.001,type=float)
 args = parser.parse_args()
 
 ## Generate directory for experiment if it doesn't exist
@@ -39,17 +40,17 @@ validation_ds = simpleSlabDataset(data_file,group='valid')
 
 train_ds.__getitem__(0)
 
-training_loader = DataLoader(train_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=1)
+training_loader = DataLoader(train_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=4)
 for x,y in training_loader:
 	break
 print(x.shape)
 print(y.shape)
-validation_loader = DataLoader(validation_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=1)
+validation_loader = DataLoader(validation_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=4)
 #test_loader = DataLoader(test_ds, batch_size=args.batch_size,shuffle=False,pin_memory=True,num_workers=8)
 cmbNet = cmbNet()
 cmbNet.to(gpu_device)
 criterion = torch.nn.BCELoss()
-opt = torch.optim.SGD(cmbNet.parameters(), lr=0.001)
+opt = torch.optim.SGD(cmbNet.parameters(), lr=args.learning_rate)
 
 # Instantiate the output csv
 curve_csv = []
